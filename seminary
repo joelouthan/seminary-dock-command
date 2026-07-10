@@ -1,0 +1,108 @@
+#!/bin/zsh
+# Seminary command menu — pick a script by number, ye olde sysadmin style.
+
+source "$HOME/.zshrc" >/dev/null 2>&1
+
+if [[ ! -t 0 ]]; then
+  echo "This menu is interactive — run it directly in a terminal."
+  exit 1
+fi
+
+while true; do
+  clear
+  echo "=========================================="
+  echo "          SEMINARY COMMAND MENU"
+  echo "=========================================="
+  echo ""
+
+  menu_choices=(
+    "New paper (seminary-new)"
+    "Build DOCX from a paper (seminary-build)"
+    "Build DOCX - most recent paper"
+    "Build DOCX - most recent paper (sermon breaks)"
+    "Import DOCX back to Markdown (seminary-import)"
+    "Fix Bible book abbreviations in a paper (seminary-fix-refs)"
+    "Fix Bible book abbreviations - most recent paper"
+    "Word count check (sem-wc)"
+    "Word count check - most recent paper"
+    "Word count check minus cover page (sem-cover-wc)"
+    "Exit"
+  )
+
+  PS3=$'\nChoose an option: '
+  select opt in "${menu_choices[@]}"; do
+    case $REPLY in
+      1)
+        read "classcode?Class code (e.g. BI11): "
+        read "title?Paper title: "
+        seminary-new "$classcode" "$title"
+        break
+        ;;
+      2)
+        read "file?Paper .md file: "
+        seminary-build "$file"
+        break
+        ;;
+      3)
+        ~/bin/sembuild-latest.sh
+        break
+        ;;
+      4)
+        ~/bin/sembuild-latest-h1-breaks.sh
+        break
+        ;;
+      5)
+        read "file?DOCX file to import: "
+        seminary-import "$file"
+        break
+        ;;
+      6)
+        read "file?Paper .md file: "
+        seminary-fix-refs "$file"
+        break
+        ;;
+      7)
+        ~/bin/semfixrefs-latest.sh
+        break
+        ;;
+      8)
+        read "file?Paper .md file: "
+        read "pages?Target page count [1]: "
+        pages=${pages:-1}
+        sem-wc "$file" "$pages"
+        break
+        ;;
+      9)
+        LATEST_MD=$(find "$SEMINARY" -name "*_Louthan_*.md" -type f -print0 \
+          | xargs -0 ls -t 2>/dev/null | head -1)
+        if [[ -z "$LATEST_MD" ]]; then
+          echo "No paper .md file found."
+        else
+          echo "Latest paper: $(basename "$LATEST_MD")"
+          read "pages?Target page count [1]: "
+          pages=${pages:-1}
+          sem-wc "$LATEST_MD" "$pages"
+        fi
+        break
+        ;;
+      10)
+        read "file?Paper .md file: "
+        read "pages?Total page count including cover [2]: "
+        pages=${pages:-2}
+        sem-cover-wc "$file" "$pages"
+        break
+        ;;
+      11)
+        echo "Goodbye."
+        exit 0
+        ;;
+      *)
+        echo "Invalid option."
+        break
+        ;;
+    esac
+  done
+
+  echo ""
+  read "?Press Enter to return to menu..."
+done
