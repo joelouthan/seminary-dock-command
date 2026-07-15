@@ -18,13 +18,13 @@ while true; do
   menu_choices=(
     "New paper (seminary-new)"
     "Build DOCX from a paper (seminary-build)"
-    "Build DOCX - most recent paper"
-    "Build DOCX - most recent paper (sermon breaks)"
+    "Build DOCX - most recent paper - USE FOR FINAL SUBMISSION"
+    "Build DOCX - most recent - H1 BREAKS USE FOR READABILITY ONLY"
     "Import DOCX back to Markdown (seminary-import)"
-    "Fix Bible book abbreviations in a paper (seminary-fix-refs)"
-    "Fix Bible book abbreviations - most recent paper"
+    "Bible book abbr + hyphens -> en-dashes"
+    "Bible book abbr + hyphens -> en-dashes - most recent"
     "Word count check (sem-wc)"
-    "Word count check - most recent paper"
+    "Word count check - most recent"
     "Word count check minus cover page (sem-cover-wc)"
     "Exit"
   )
