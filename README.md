@@ -21,11 +21,11 @@ These scripts are personal tools, not a polished package — paths assume a spec
 These scripts assume:
 
 - A `~/Documents/Seminary` folder containing:
-  - `templates/build.sh` and `templates/build-with-sermon-breaks.sh` — the actual pandoc build pipelines (reference doc, CSL, Lua filters).
+  - `templates/build.sh`, `templates/build-book-review.sh`, and `templates/build-with-sermon-breaks.sh` — the actual pandoc build pipelines (reference doc, CSL, Lua filters).
   - `templates/fix-bible-refs.sh` — the `sed`-based abbreviation script that `semfixrefs-latest.sh` calls.
   - Papers named `CLASSCODE_Louthan_*.md` (e.g. `BI11_Louthan_Preaching_Christ_from_the_Old_Testament.md`).
 
-- Shell functions defined in `~/.zshrc`: `seminary-new`, `seminary-build`, `seminary-import`, `seminary-fix-refs`, `sem-wc`, `sem-cover-wc` — the `seminary` menu script sources `~/.zshrc` to call these directly.
+- Shell functions defined in `~/.zshrc`: `seminary-new`, `seminary-build`, `seminary-new-review`, `seminary-build-review`, `seminary-import`, `seminary-fix-refs`, `sem-wc`, `sem-cover-wc` — the `seminary` menu script sources `~/.zshrc` to call these directly.
 
 - macOS (`osascript` for notifications, `open -a "Microsoft Word"`).
 

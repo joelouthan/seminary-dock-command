@@ -6,7 +6,7 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 SEMINARY="$HOME/Documents/Seminary"
 
 # Papers are named CLASSCODE_Louthan_*.md — this excludes syllabi, study guides, etc.
-LATEST_MD=$(find "$SEMINARY" -name "*_Louthan_*.md" -type f -print0 \
+LATEST_MD=$(find -L "$SEMINARY" -name "*_Louthan_*.md" -type f -print0 \
   | xargs -0 ls -t 2>/dev/null \
   | head -1)
 

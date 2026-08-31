@@ -27,7 +27,7 @@ while true; do
     "Word count check - most recent"
     "Word count check minus cover page (sem-cover-wc)"
     "New BOOK REVIEW (seminary-new-review)"
-    "Build DOCX from a BOOK REVIEW (seminary-build-review)"
+    "Build DOCX from a BOOK REVIEW - most recent"
   )
 
   PS3=$'\nChoose an option (q to quit): '
@@ -74,7 +74,7 @@ while true; do
         break
         ;;
       9)
-        LATEST_MD=$(find "$SEMINARY" -name "*_Louthan_*.md" -type f -print0 \
+        LATEST_MD=$(find -L "$SEMINARY" -name "*_Louthan_*.md" -type f -print0 \
           | xargs -0 ls -t 2>/dev/null | head -1)
         if [[ -z "$LATEST_MD" ]]; then
           echo "No paper .md file found."
@@ -100,8 +100,17 @@ while true; do
         break
         ;;
       12)
-        read "file?Book review .md file: "
-        seminary-build-review "$file"
+        # Forces the book-review pipeline (no cover page) regardless of whether
+        # the file carries a bibref: key -- picking this option is the override.
+        # -L because $SEMINARY is a symlink; find will not descend it otherwise.
+        LATEST_MD=$(find -L "$SEMINARY" -name "*_Louthan_*.md" -type f -print0 \
+          | xargs -0 ls -t 2>/dev/null | head -1)
+        if [[ -z "$LATEST_MD" ]]; then
+          echo "No paper .md file found."
+        else
+          echo "Latest: $(basename "$LATEST_MD")"
+          seminary-build-review "$LATEST_MD"
+        fi
         break
         ;;
       q|Q)
