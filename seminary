@@ -18,7 +18,7 @@ while true; do
   menu_choices=(
     "New paper (seminary-new)"
     "Build DOCX from a paper (seminary-build)"
-    "Build DOCX - most recent paper - USE FOR FINAL SUBMISSION"
+    "Build DOCX - most recent paper or review - USE FOR FINAL SUBMISSION"
     "Build DOCX - most recent - H1 BREAKS USE FOR READABILITY ONLY"
     "Import DOCX back to Markdown (seminary-import)"
     "Bible book abbr + hyphens -> en-dashes"
@@ -26,10 +26,11 @@ while true; do
     "Word count check (sem-wc)"
     "Word count check - most recent"
     "Word count check minus cover page (sem-cover-wc)"
-    "Exit"
+    "New BOOK REVIEW (seminary-new-review)"
+    "Build DOCX from a BOOK REVIEW (seminary-build-review)"
   )
 
-  PS3=$'\nChoose an option: '
+  PS3=$'\nChoose an option (q to quit): '
   select opt in "${menu_choices[@]}"; do
     case $REPLY in
       1)
@@ -93,6 +94,17 @@ while true; do
         break
         ;;
       11)
+        read "classcode?Class code (e.g. BI13): "
+        read "title?Book short title (e.g. Carson Exegetical Fallacies): "
+        seminary-new-review "$classcode" "$title"
+        break
+        ;;
+      12)
+        read "file?Book review .md file: "
+        seminary-build-review "$file"
+        break
+        ;;
+      q|Q)
         echo "Goodbye."
         exit 0
         ;;
@@ -104,5 +116,6 @@ while true; do
   done
 
   echo ""
-  read "?Press Enter to return to menu..."
+  # On EOF (stdin exhausted) exit instead of silently redrawing the menu.
+  read "?Press Enter to return to menu..." || exit 0
 done
