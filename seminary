@@ -28,6 +28,9 @@ while true; do
     "Word count check minus cover page (sem-cover-wc)"
     "New BOOK REVIEW (seminary-new-review)"
     "Build DOCX from a BOOK REVIEW - most recent"
+    "Take practice quiz - most recent JSON quiz file (semquiz)"
+    "Take practice quiz - choose class and quiz"
+    "Generate a new practice quiz from a PDF (seminary-quiz-from-pdf)"
   )
 
   PS3=$'\nChoose an option (q to quit): '
@@ -110,6 +113,104 @@ while true; do
         else
           echo "Latest: $(basename "$LATEST_MD")"
           seminary-build-review "$LATEST_MD"
+        fi
+        break
+        ;;
+      13)
+        # Excludes *.history.json (score logs) so it only picks up actual quizzes.
+        LATEST_QUIZ=$(find -L "$SEMINARY" -name "*.json" -type f ! -name "*.history.json" -print0 \
+          | xargs -0 ls -t 2>/dev/null | head -1)
+        if [[ -z "$LATEST_QUIZ" ]]; then
+          echo "No quiz .json file found."
+        else
+          echo "Latest quiz: $(basename "$LATEST_QUIZ")"
+          seminary-quiz "$LATEST_QUIZ"
+        fi
+        break
+        ;;
+      14)
+        classdirs=()
+        for d in "$SEMINARY"/*/; do
+          classdirs+=("$(basename "${d%/}")")
+        done
+        if [[ ${#classdirs[@]} -eq 0 ]]; then
+          echo "No class subdirectories found in $SEMINARY."
+          break
+        fi
+        echo ""
+        echo "Which class?"
+        select classdir in "${classdirs[@]}"; do
+          if [[ -z "$REPLY" || "$REPLY" -lt 1 || "$REPLY" -gt ${#classdirs[@]} ]]; then
+            echo "Invalid selection."
+            break 2
+          fi
+          break
+        done
+
+        # Excludes *.history.json (score logs) so it only picks up actual quizzes.
+        quizzes=()
+        while IFS= read -r -d '' f; do
+          quizzes+=("$f")
+        done < <(find -L "$SEMINARY/$classdir" -maxdepth 1 -iname "*.json" ! -iname "*.history.json" -print0 | sort -z)
+        if [[ ${#quizzes[@]} -eq 0 ]]; then
+          echo "No quiz JSON files found in $classdir."
+          break
+        fi
+        echo ""
+        echo "Which quiz?"
+        select quizname in "${quizzes[@]:t}"; do
+          if [[ -z "$REPLY" || "$REPLY" -lt 1 || "$REPLY" -gt ${#quizzes[@]} ]]; then
+            echo "Invalid selection."
+            break 2
+          fi
+          seminary-quiz "${quizzes[$REPLY]}"
+          break
+        done
+        break
+        ;;
+      15)
+        classdirs=()
+        for d in "$SEMINARY"/*/; do
+          classdirs+=("$(basename "${d%/}")")
+        done
+        if [[ ${#classdirs[@]} -eq 0 ]]; then
+          echo "No class subdirectories found in $SEMINARY."
+          break
+        fi
+        echo ""
+        echo "Which class?"
+        select classdir in "${classdirs[@]}"; do
+          if [[ -z "$REPLY" || "$REPLY" -lt 1 || "$REPLY" -gt ${#classdirs[@]} ]]; then
+            echo "Invalid selection."
+            break 2
+          fi
+          break
+        done
+
+        pdfs=()
+        while IFS= read -r -d '' f; do
+          pdfs+=("$f")
+        done < <(find -L "$SEMINARY/$classdir" -maxdepth 1 -iname "*.pdf" -print0 | sort -z)
+        if [[ ${#pdfs[@]} -eq 0 ]]; then
+          echo "No PDFs found in $classdir."
+          break
+        fi
+        echo ""
+        echo "Which PDF?"
+        select pdfname in "${pdfs[@]:t}"; do
+          if [[ -z "$REPLY" || "$REPLY" -lt 1 || "$REPLY" -gt ${#pdfs[@]} ]]; then
+            echo "Invalid selection."
+            break 2
+          fi
+          pdf="${pdfs[$REPLY]}"
+          break
+        done
+
+        read "output?Output quiz JSON [default: alongside PDF, <PdfBasename>_Quiz.json]: "
+        if [[ -z "$output" ]]; then
+          seminary-quiz-from-pdf "$pdf"
+        else
+          seminary-quiz-from-pdf "$pdf" "$output"
         fi
         break
         ;;
