@@ -31,6 +31,7 @@ while true; do
     "Take practice quiz - most recent JSON quiz file (semquiz)"
     "Take practice quiz - choose class and quiz"
     "Generate a new practice quiz from a PDF (seminary-quiz-from-pdf)"
+    "Convert a PDF to Markdown notes (seminary-pdf2md)"
   )
 
   PS3=$'\nChoose an option (q to quit): '
@@ -212,6 +213,10 @@ while true; do
         else
           seminary-quiz-from-pdf "$pdf" "$output"
         fi
+        break
+        ;;
+      16)
+        seminary-pdf2md
         break
         ;;
       q|Q)
