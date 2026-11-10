@@ -13,33 +13,35 @@ fi
 VAULT="$HOME/Notes/Obsidian/Hydralisk"
 
 # "## Section" starts a group; "key|label" is a menu item. Items are numbered in order.
+# "||" starts the right-hand column (used when the window is wide enough for two).
 MENU=(
   "## Write"
-  "new-paper|New paper (seminary-new)"
-  "new-review|New book review (seminary-new-review)"
-  "import|Import DOCX back to Markdown (seminary-import)"
+  "new-paper|New paper"
+  "new-review|New book review"
+  "import|Import DOCX → Markdown"
 
   "## Check & clean up"
-  "refs|Bible book abbr + hyphens -> en-dashes"
-  "refs-latest|Bible book abbr + hyphens -> en-dashes · most recent"
-  "wc|Word count check (sem-wc)"
-  "wc-latest|Word count check · most recent"
-  "wc-cover|Word count check minus cover page (sem-cover-wc)"
+  "refs|Fix Bible refs (abbr + en-dashes)"
+  "refs-latest|Fix Bible refs · most recent"
+  "wc|Word count"
+  "wc-latest|Word count · most recent"
+  "wc-cover|Word count minus cover page"
 
+  "||"
   "## Build DOCX"
-  "build|Build DOCX from a paper (seminary-build)"
-  "build-latest|Most recent paper or review · USE FOR FINAL SUBMISSION"
-  "build-h1|Most recent · H1 breaks · readability only"
-  "build-review|Most recent BOOK REVIEW"
+  "build|Build DOCX from a paper"
+  "build-latest|Most recent · FINAL SUBMISSION"
+  "build-h1|Most recent · H1 breaks (readability)"
+  "build-review|Most recent book review"
 
   "## Study"
-  "quiz-latest|Practice quiz · most recent quiz (semquiz)"
-  "quiz-pick|Practice quiz · choose class and quiz"
-  "quiz-new|New practice quiz from a PDF (seminary-quiz-from-pdf)"
-  "pdf2md|Convert a PDF to Markdown notes (seminary-pdf2md)"
+  "quiz-latest|Quiz · most recent"
+  "quiz-pick|Quiz · choose class and quiz"
+  "quiz-new|New quiz from a PDF"
+  "pdf2md|PDF → Markdown notes"
 
   "## Obsidian"
-  "banner|Card banner for the Kanban board (card-banners.py)"
+  "banner|Kanban card banner"
 )
 
 # Colors only when the terminal supports them.
@@ -50,22 +52,65 @@ else
 fi
 
 draw_menu() {
-  clear
-  echo "=========================================="
-  echo "          SEMINARY COMMAND MENU"
-  echo "=========================================="
+  # Lay the menu out as lines: plain text (to measure width) and colored text (to print).
   keys=()
-  local entry n=0
+  local -a lplain lcolor rplain rcolor
+  local entry text n=0 side=l
   for entry in "${MENU[@]}"; do
-    if [[ $entry == "## "* ]]; then
-      echo ""
-      echo "${B}${C}${entry#\#\# }${R}"
+    if [[ $entry == "||" ]]; then
+      side=r
+      continue
+    elif [[ $entry == "## "* ]]; then
+      text="${entry#\#\# }"
+      if [[ $side == l ]]; then
+        (( ${#lplain} )) && { lplain+=(""); lcolor+=(""); }
+        lplain+=("$text"); lcolor+=("${B}${C}${text}${R}")
+      else
+        (( ${#rplain} )) && { rplain+=(""); rcolor+=(""); }
+        rplain+=("$text"); rcolor+=("${B}${C}${text}${R}")
+      fi
     else
       (( n++ ))
       keys+=("${entry%%|*}")
-      printf "  ${D}%2d)${R} %s\n" $n "${entry#*|}"
+      text="${entry#*|}"
+      if [[ $side == l ]]; then
+        lplain+=("$(printf '  %2d) %s' $n "$text")"); lcolor+=("$(printf "  ${D}%2d)${R} %s" $n "$text")")
+      else
+        rplain+=("$(printf '  %2d) %s' $n "$text")"); rcolor+=("$(printf "  ${D}%2d)${R} %s" $n "$text")")
+      fi
     fi
   done
+
+  local line lw=0 rw=0 gap=4 i rows
+  for line in "${lplain[@]}"; do (( ${#line} > lw )) && lw=${#line}; done
+  for line in "${rplain[@]}"; do (( ${#line} > rw )) && rw=${#line}; done
+  # Ask the terminal itself, so a resized window is picked up on every redraw.
+  local cols=${$(stty size </dev/tty 2>/dev/null)[2]:-80}
+  local width=$(( lw + gap + rw ))
+
+  clear
+  if (( ${#rplain} && cols >= width )); then
+    # Two columns, side by side.
+    local rule=${(l:width::=:)}
+    local title="SEMINARY COMMAND MENU"
+    echo "$rule"
+    printf '%*s%s\n' $(( (width - ${#title}) / 2 )) "" "$title"
+    echo "$rule"
+    echo ""
+    rows=$(( ${#lplain} > ${#rplain} ? ${#lplain} : ${#rplain} ))
+    for (( i = 1; i <= rows; i++ )); do
+      printf '%s%*s%s\n' "${lcolor[i]}" $(( lw + gap - ${#lplain[i]} )) "" "${rcolor[i]}"
+    done
+  else
+    # One column: narrow window.
+    echo "=========================================="
+    echo "          SEMINARY COMMAND MENU"
+    echo "=========================================="
+    echo ""
+    for line in "${lcolor[@]}"; do echo "$line"; done
+    echo ""
+    for line in "${rcolor[@]}"; do echo "$line"; done
+  fi
   echo ""
 }
 
