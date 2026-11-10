@@ -11,7 +11,8 @@ These scripts are personal tools, not a polished package — paths assume a spec
 
 ## Scripts
 
-- **`seminary`** — Interactive numbered menu for all the commands below. Run it in a terminal and pick an option.
+- **`seminary`** — Interactive numbered menu for all the commands below, grouped by task: **Write**, **Check & clean up**, **Build DOCX**, **Study**, and **Obsidian**. Run it in a terminal and pick an option. To add an item, add a `key|label` line under its section in `MENU`, then a matching case in `run_action`.
+  - **Obsidian → Card banner** runs `Scripts/card-banners.py` in the Obsidian vault to make an SVG cover banner for a Kanban card (seminary = dark grey, OT commentary = dark blue, NT commentary = dark red, Gospel writings = dark purple). It copies the card's `image:` line to the clipboard.
 - **`sembuild-latest.sh`** — Finds the most recently edited paper, builds it to DOCX, and opens it in Word. Fires macOS notifications at each step.
 - **`sembuild-latest-h1-breaks.sh`** — Same as above, but uses a build variant that inserts page breaks at each top-level (`#`) heading — used for sermon manuscripts.
 - **`semfixrefs-latest.sh`** — Finds the most recently edited paper and shortens full Bible book names to the seminary's style-sheet abbreviations (e.g. "Genesis 3:16" → "Gen. 3:16"), wherever a book name is directly followed by a chapter number. Backs up to `.bak` first.
